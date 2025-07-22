@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { RotateCcw, Undo2, Play } from "lucide-react"
+import { RotateCcw, Undo2, Play, Pause, Clock } from "lucide-react"
 import type { GameStatus } from "@/types/chess"
 
 interface GameControlsProps {
@@ -11,9 +11,25 @@ interface GameControlsProps {
   onUndo: () => void
   canUndo: boolean
   gameStatus: GameStatus
+  timer?: {
+    white: number
+    black: number
+    increment: number
+    isActive: boolean
+  }
+  onPauseTimer?: () => void
+  onStartTimer?: () => void
 }
 
-export function GameControls({ onReset, onUndo, canUndo, gameStatus }: GameControlsProps) {
+export function GameControls({ 
+  onReset, 
+  onUndo, 
+  canUndo, 
+  gameStatus, 
+  timer, 
+  onPauseTimer, 
+  onStartTimer 
+}: GameControlsProps) {
   const isGameOver = gameStatus === "checkmate" || gameStatus === "stalemate"
 
   return (
@@ -30,6 +46,25 @@ export function GameControls({ onReset, onUndo, canUndo, gameStatus }: GameContr
         </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Timer Controls */}
+          {timer && (onPauseTimer || onStartTimer) && (
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                onClick={timer.isActive ? onPauseTimer : onStartTimer}
+                variant="outline"
+                className="w-full bg-gradient-to-r from-purple-600/20 to-pink-600/20 border-purple-500/50 text-slate-100 hover:bg-gradient-to-r hover:from-purple-600/30 hover:to-pink-600/30 hover:border-purple-400/70 shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
+                size="lg"
+                disabled={isGameOver}
+              >
+                {timer.isActive ? <Pause className="w-5 h-5 mr-2" /> : <Clock className="w-5 h-5 mr-2" />}
+                {timer.isActive ? "Tạm dừng" : "Tiếp tục"}
+              </Button>
+            </motion.div>
+          )}
+
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

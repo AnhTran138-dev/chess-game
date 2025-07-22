@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import type {
   ChessPiece,
   Position,
@@ -8,6 +8,7 @@ import type {
   Move,
   GameState,
   PieceType,
+  TimeControl,
 } from "@/types/chess";
 import { ChessEngine } from "@/lib/chess-engine";
 
@@ -60,8 +61,115 @@ export function useChessGame() {
     from: Position;
     to: Position;
   } | null>(null);
+  const [selectedTimeControl, setSelectedTimeControl] = useState<TimeControl | null>(null);
+  const [isTimerEnabled, setIsTimerEnabled] = useState(false);
+  
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastUpdateRef = useRef<number>(Date.now());
 
   const chessEngine = useMemo(() => new ChessEngine(), []);
+
+  // Timer effect
+  useEffect(() => {
+    if (!isTimerEnabled || !gameState.timer?.isActive || gameState.gameStatus !== "playing") {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
+
+    timerRef.current = setInterval(() => {
+      const now = Date.now();
+      const elapsed = now - lastUpdateRef.current;
+      lastUpdateRef.current = now;
+
+      setGameState(prevState => {
+        if (!prevState.timer) return prevState;
+
+        const newTimer = { ...prevState.timer };
+        const currentPlayerTime = newTimer[prevState.currentPlayer];
+        
+        if (currentPlayerTime <= 0) {
+          // Hết thời gian
+          return {
+            ...prevState,
+            gameStatus: "checkmate", // Người chơi hết thời gian thua
+            timer: {
+              ...newTimer,
+              isActive: false,
+            }
+          };
+        }
+
+        newTimer[prevState.currentPlayer] = Math.max(0, currentPlayerTime - elapsed);
+
+        return {
+          ...prevState,
+          timer: newTimer,
+        };
+      });
+    }, 100); // Cập nhật mỗi 100ms để hiển thị mượt
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isTimerEnabled, gameState.timer?.isActive, gameState.gameStatus]);
+
+  // Khởi tạo timer khi chọn time control
+  const initializeTimer = useCallback((timeControl: TimeControl) => {
+    if (timeControl.initialTime === 0) {
+      // Unlimited time
+      setIsTimerEnabled(false);
+      setGameState(prevState => ({
+        ...prevState,
+        timer: undefined,
+      }));
+    } else {
+      const initialTimeMs = timeControl.initialTime * 60 * 1000;
+      setIsTimerEnabled(true);
+      setGameState(prevState => ({
+        ...prevState,
+        timer: {
+          white: initialTimeMs,
+          black: initialTimeMs,
+          increment: timeControl.increment * 1000, // Convert to milliseconds
+          isActive: false, // Sẽ được kích hoạt khi bắt đầu game
+        },
+      }));
+    }
+    setSelectedTimeControl(timeControl);
+  }, []);
+
+  // Bắt đầu timer
+  const startTimer = useCallback(() => {
+    if (gameState.timer) {
+      setGameState(prevState => ({
+        ...prevState,
+        timer: prevState.timer ? {
+          ...prevState.timer,
+          isActive: true,
+        } : undefined,
+      }));
+      lastUpdateRef.current = Date.now();
+    }
+  }, [gameState.timer]);
+
+  // Tạm dừng timer
+  const pauseTimer = useCallback(() => {
+    if (gameState.timer) {
+      setGameState(prevState => ({
+        ...prevState,
+        timer: prevState.timer ? {
+          ...prevState.timer,
+          isActive: false,
+        } : undefined,
+      }));
+    }
+  }, [gameState.timer]);
 
   // Kiểm tra xem tốt có thể phong cấp không
   const canPromotePawn = (piece: ChessPiece, position: Position): boolean => {
@@ -111,12 +219,22 @@ export function useChessGame() {
         gameState.currentPlayer === "white" ? "black" : "white";
       const newGameStatus = chessEngine.getGameStatus(newBoard, nextPlayer);
 
+      // Cập nhật timer nếu có
+      let newTimer = gameState.timer;
+      if (newTimer && newTimer.isActive) {
+        newTimer = {
+          ...newTimer,
+          [gameState.currentPlayer]: newTimer[gameState.currentPlayer] + newTimer.increment,
+        };
+      }
+
       setGameState({
         board: newBoard,
         currentPlayer: nextPlayer,
         gameStatus: newGameStatus,
         moveHistory: [...gameState.moveHistory, move],
         capturedPieces: newCapturedPieces,
+        timer: newTimer,
       });
 
       // Reset các state
@@ -256,6 +374,15 @@ export function useChessGame() {
           gameState.currentPlayer === "white" ? "black" : "white";
         const newGameStatus = chessEngine.getGameStatus(
           newBoard,
+        // Cập nhật timer nếu có
+        let newTimer = gameState.timer;
+        if (newTimer && newTimer.isActive) {
+          newTimer = {
+            ...newTimer,
+            [gameState.currentPlayer]: newTimer[gameState.currentPlayer] + newTimer.increment,
+          };
+        }
+
           nextPlayer,
           move
         );
@@ -266,6 +393,7 @@ export function useChessGame() {
           gameStatus: newGameStatus,
           moveHistory: [...gameState.moveHistory, move],
           capturedPieces: newCapturedPieces,
+          timer: newTimer,
         });
 
         setSelectedSquare(null);
@@ -298,12 +426,18 @@ export function useChessGame() {
       gameStatus: "playing",
       moveHistory: [],
       capturedPieces: { white: [], black: [] },
+      timer: selectedTimeControl && selectedTimeControl.initialTime > 0 ? {
+        white: selectedTimeControl.initialTime * 60 * 1000,
+        black: selectedTimeControl.initialTime * 60 * 1000,
+        increment: selectedTimeControl.increment * 1000,
+        isActive: false,
+      } : undefined,
     });
     setSelectedSquare(null);
     setValidMoves([]);
     setPromotionPosition(null);
     setPendingMove(null);
-  }, []);
+  }, [selectedTimeControl]);
 
   const undoMove = useCallback(() => {
     if (gameState.moveHistory.length === 0) return;
@@ -399,12 +533,28 @@ export function useChessGame() {
     setValidMoves([]);
   }, [gameState, chessEngine]);
 
+  // Format thời gian hiển thị
+  const formatTime = useCallback((timeMs: number): string => {
+    if (timeMs <= 0) return "0:00";
+    
+    const totalSeconds = Math.ceil(timeMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    
+    if (minutes > 0) {
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    } else {
+      return `0:${seconds.toString().padStart(2, '0')}`;
+    }
+  }, []);
+
   return {
     board: gameState.board,
     currentPlayer: gameState.currentPlayer,
     gameStatus: gameState.gameStatus,
     moveHistory: gameState.moveHistory,
     capturedPieces: gameState.capturedPieces,
+    timer: gameState.timer,
     selectedSquare,
     validMoves,
     handleSquareClick,
@@ -412,5 +562,12 @@ export function useChessGame() {
     undoMove,
     promotionPosition,
     handlePromotion,
+    // Timer functions
+    selectedTimeControl,
+    isTimerEnabled,
+    initializeTimer,
+    startTimer,
+    pauseTimer,
+    formatTime,
   };
 }
