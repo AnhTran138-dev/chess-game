@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type {
   ChessPiece,
   Position,
@@ -61,7 +61,7 @@ export function useChessGame() {
     to: Position;
   } | null>(null);
 
-  const chessEngine = new ChessEngine();
+  const chessEngine = useMemo(() => new ChessEngine(), []);
 
   // Kiểm tra xem tốt có thể phong cấp không
   const canPromotePawn = (piece: ChessPiece, position: Position): boolean => {
@@ -144,10 +144,13 @@ export function useChessGame() {
       if (!selectedSquare) {
         if (piece && piece.color === gameState.currentPlayer) {
           setSelectedSquare(position);
+          const lastMove =
+            gameState.moveHistory[gameState.moveHistory.length - 1];
           const moves = chessEngine.getValidMoves(
             gameState.board,
             position,
-            gameState.currentPlayer
+            gameState.currentPlayer,
+            lastMove
           );
           setValidMoves(moves);
         }
@@ -181,8 +184,11 @@ export function useChessGame() {
         }
 
         const capturedPiece = gameState.board[position.row][position.col];
-
+        const lastMove =
+          gameState.moveHistory[gameState.moveHistory.length - 1];
         let newBoard: (ChessPiece | null)[][];
+        let isEnPassant = false;
+        let enPassantCapturedPiece: ChessPiece | null = null;
 
         // Kiểm tra nước nhập thành
         if (
@@ -192,6 +198,25 @@ export function useChessGame() {
             gameState.board,
             selectedSquare,
             position
+          );
+        } else if (
+          lastMove &&
+          chessEngine.isEnPassantMove(
+            gameState.board,
+            selectedSquare,
+            position,
+            lastMove
+          )
+        ) {
+          // Nước đi bắt tốt qua đường
+          isEnPassant = true;
+          enPassantCapturedPiece =
+            gameState.board[lastMove.to.row][lastMove.to.col];
+          newBoard = chessEngine.executeEnPassant(
+            gameState.board,
+            selectedSquare,
+            position,
+            lastMove
           );
         } else {
           // Nước đi thường
@@ -208,20 +233,32 @@ export function useChessGame() {
           from: selectedSquare,
           to: position,
           piece: movingPiece,
-          capturedPiece: capturedPiece || undefined,
+          capturedPiece: isEnPassant
+            ? enPassantCapturedPiece || undefined
+            : capturedPiece || undefined,
           timestamp: new Date(),
+          isEnPassant,
         };
 
         // Update captured pieces
         const newCapturedPieces = { ...gameState.capturedPieces };
-        if (capturedPiece) {
-          newCapturedPieces[capturedPiece.color].push(capturedPiece);
+        const actualCapturedPiece = isEnPassant
+          ? enPassantCapturedPiece
+          : capturedPiece;
+        if (actualCapturedPiece) {
+          newCapturedPieces[actualCapturedPiece.color].push(
+            actualCapturedPiece
+          );
         }
 
         // Check game status
         const nextPlayer: Player =
           gameState.currentPlayer === "white" ? "black" : "white";
-        const newGameStatus = chessEngine.getGameStatus(newBoard, nextPlayer);
+        const newGameStatus = chessEngine.getGameStatus(
+          newBoard,
+          nextPlayer,
+          move
+        );
 
         setGameState({
           board: newBoard,
@@ -236,10 +273,13 @@ export function useChessGame() {
       } else if (piece && piece.color === gameState.currentPlayer) {
         // Select new piece
         setSelectedSquare(position);
+        const lastMove =
+          gameState.moveHistory[gameState.moveHistory.length - 1];
         const moves = chessEngine.getValidMoves(
           gameState.board,
           position,
-          gameState.currentPlayer
+          gameState.currentPlayer,
+          lastMove
         );
         setValidMoves(moves);
       } else {
@@ -301,6 +341,20 @@ export function useChessGame() {
         const rook = newBoard[row][3]!;
         newBoard[row][0] = { ...rook, hasMoved: false };
         newBoard[row][3] = null;
+      }
+    } else if (lastMove.isEnPassant) {
+      // Hoàn tác bắt tốt qua đường
+      // Đưa tốt về vị trí ban đầu
+      newBoard[lastMove.from.row][lastMove.from.col] = lastMove.piece;
+      newBoard[lastMove.to.row][lastMove.to.col] = null;
+
+      // Khôi phục tốt bị bắt về vị trí của nó
+      if (lastMove.capturedPiece) {
+        const capturedPawnRow =
+          lastMove.piece.color === "white"
+            ? lastMove.to.row + 1
+            : lastMove.to.row - 1;
+        newBoard[capturedPawnRow][lastMove.to.col] = lastMove.capturedPiece;
       }
     } else if (lastMove.promotedTo) {
       // Hoàn tác phong cấp tốt
