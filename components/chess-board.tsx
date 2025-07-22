@@ -58,23 +58,7 @@ export function ChessBoard({
   // Check if the king at this position is in check
   const isKingInCheck = (row: number, col: number) => {
     const piece = board[row][col]
-    if (!piece || piece.type !== "king") return false
-
-    // Simple check detection - look for enemy pieces that can attack this square
-    const enemyColor = piece.color === "white" ? "black" : "white"
-
-    for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 8; c++) {
-        const enemyPiece = board[r][c]
-        if (enemyPiece && enemyPiece.color === enemyColor) {
-          // Check if this enemy piece can attack the king's position
-          const canAttack = canPieceAttackSquare(board, { row: r, col: c }, { row, col }, enemyPiece)
-          if (canAttack) return true
-        }
-      }
-    }
-
-    return false
+    return piece?.type === "king" && piece.color === currentPlayer && gameStatus === "check"
   }
 
   return (
@@ -152,66 +136,4 @@ export function ChessBoard({
       </div>
     </motion.div>
   )
-}
-
-// Helper function to check if a piece can attack a specific square
-function canPieceAttackSquare(
-  board: (ChessPiece | null)[][],
-  piecePos: Position,
-  targetPos: Position,
-  piece: ChessPiece,
-): boolean {
-  const { row: fromRow, col: fromCol } = piecePos
-  const { row: toRow, col: toCol } = targetPos
-
-  switch (piece.type) {
-    case "pawn":
-      const direction = piece.color === "white" ? -1 : 1
-      return fromRow + direction === toRow && Math.abs(fromCol - toCol) === 1
-
-    case "rook":
-      return (fromRow === toRow || fromCol === toCol) && isPathClear(board, piecePos, targetPos)
-
-    case "bishop":
-      return Math.abs(fromRow - toRow) === Math.abs(fromCol - toCol) && isPathClear(board, piecePos, targetPos)
-
-    case "queen":
-      return (
-        (fromRow === toRow || fromCol === toCol || Math.abs(fromRow - toRow) === Math.abs(fromCol - toCol)) &&
-        isPathClear(board, piecePos, targetPos)
-      )
-
-    case "king":
-      return Math.abs(fromRow - toRow) <= 1 && Math.abs(fromCol - toCol) <= 1
-
-    case "knight":
-      const rowDiff = Math.abs(fromRow - toRow)
-      const colDiff = Math.abs(fromCol - toCol)
-      return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2)
-
-    default:
-      return false
-  }
-}
-
-// Helper function to check if path is clear between two positions
-function isPathClear(board: (ChessPiece | null)[][], from: Position, to: Position): boolean {
-  const rowDiff = to.row - from.row
-  const colDiff = to.col - from.col
-
-  const rowStep = rowDiff === 0 ? 0 : rowDiff / Math.abs(rowDiff)
-  const colStep = colDiff === 0 ? 0 : colDiff / Math.abs(colDiff)
-
-  let currentRow = from.row + rowStep
-  let currentCol = from.col + colStep
-
-  while (currentRow !== to.row || currentCol !== to.col) {
-    if (board[currentRow][currentCol] !== null) {
-      return false
-    }
-    currentRow += rowStep
-    currentCol += colStep
-  }
-
-  return true
 }

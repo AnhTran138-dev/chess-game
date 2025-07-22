@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { gsap } from "gsap";
+import { cn } from "@/lib/utils";
 import type { ChessPiece } from "@/types/chess";
 
 interface ChessPieceProps {
@@ -86,15 +87,16 @@ export function ChessPieceComponent({
   return (
     <motion.div
       ref={pieceRef}
-      className={`text-4xl select-none transition-all duration-200 ${
+      className={cn(
         "text-5xl select-none transition-all duration-300 font-bold",
         canMove ? "cursor-pointer" : "cursor-default",
         isSelected ? "drop-shadow-2xl" : "drop-shadow-lg",
+        isInCheck && piece.type === "king"
           ? "text-red-300"
           : piece.color === "white"
           ? "text-white"
           : "text-slate-900"
-      }`}
+      )}
       whileHover={canMove ? { scale: 1.1, y: -2 } : {}}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
       style={{
