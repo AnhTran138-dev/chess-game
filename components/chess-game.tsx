@@ -1,14 +1,14 @@
-"use client"
-import { motion } from "framer-motion"
-import { ChessBoard } from "@/components/chess-board"
-import { GameControls } from "@/components/game-controls"
-import { GameHistory } from "@/components/game-history"
-import { GameStatus } from "@/components/game-status"
-import { ChessTimer } from "@/components/chess-timer"
-import { TimeControlSelector } from "@/components/time-control-selector"
-import { useChessGame } from "@/hooks/use-chess-game"
-import { Card } from "@/components/ui/card"
-import { PawnPromotionModal } from "@/components/pawn-promotion-modal"
+"use client";
+import { motion } from "framer-motion";
+import { ChessBoard } from "@/components/chess-board";
+import { GameControls } from "@/components/game-controls";
+import { GameHistory } from "@/components/game-history";
+import { GameStatus } from "@/components/game-status";
+import { ChessTimer } from "@/components/chess-timer";
+import { TimeControlSelector } from "@/components/time-control-selector";
+import { useChessGame } from "@/hooks/use-chess-game";
+import { Card } from "@/components/ui/card";
+import { PawnPromotionModal } from "@/components/pawn-promotion-modal";
 
 export function ChessGame() {
   const {
@@ -31,19 +31,19 @@ export function ChessGame() {
     startTimer,
     pauseTimer,
     formatTime,
-  } = useChessGame()
+  } = useChessGame();
 
   const gameStarted = moveHistory.length > 0 || (timer?.isActive ?? false);
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="container mx-auto p-4 max-w-7xl relative z-10"
+      className="container mx-auto p-4 max-w-8xl relative z-10"
     >
       {/* Header */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
@@ -72,7 +72,7 @@ export function ChessGame() {
               />
             </motion.div>
           )}
-          
+
           {isTimerEnabled && timer && (
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -97,7 +97,11 @@ export function ChessGame() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
           >
-            <GameStatus currentPlayer={currentPlayer} gameStatus={gameStatus} capturedPieces={capturedPieces} />
+            <GameStatus
+              currentPlayer={currentPlayer}
+              gameStatus={gameStatus}
+              capturedPieces={capturedPieces}
+            />
           </motion.div>
 
           <motion.div
@@ -107,14 +111,14 @@ export function ChessGame() {
           >
             <Card className="p-6 bg-slate-900/90 backdrop-blur-xl border-slate-700/50 shadow-2xl ring-1 ring-white/10">
               <div className="flex justify-center">
-            <ChessBoard
-              board={board}
-              selectedSquare={selectedSquare}
-              validMoves={validMoves}
-              onSquareClick={handleSquareClick}
-              currentPlayer={currentPlayer}
-              gameStatus={gameStatus}
-            />
+                <ChessBoard
+                  board={board}
+                  selectedSquare={selectedSquare}
+                  validMoves={validMoves}
+                  onSquareClick={handleSquareClick}
+                  currentPlayer={currentPlayer}
+                  gameStatus={gameStatus}
+                />
               </div>
             </Card>
           </motion.div>
@@ -157,5 +161,5 @@ export function ChessGame() {
         />
       )}
     </motion.div>
-  )
+  );
 }

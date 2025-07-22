@@ -61,9 +61,10 @@ export function useChessGame() {
     from: Position;
     to: Position;
   } | null>(null);
-  const [selectedTimeControl, setSelectedTimeControl] = useState<TimeControl | null>(null);
+  const [selectedTimeControl, setSelectedTimeControl] =
+    useState<TimeControl | null>(null);
   const [isTimerEnabled, setIsTimerEnabled] = useState(false);
-  
+
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const lastUpdateRef = useRef<number>(Date.now());
 
@@ -71,7 +72,11 @@ export function useChessGame() {
 
   // Timer effect
   useEffect(() => {
-    if (!isTimerEnabled || !gameState.timer?.isActive || gameState.gameStatus !== "playing") {
+    if (
+      !isTimerEnabled ||
+      !gameState.timer?.isActive ||
+      gameState.gameStatus !== "playing"
+    ) {
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
@@ -84,12 +89,12 @@ export function useChessGame() {
       const elapsed = now - lastUpdateRef.current;
       lastUpdateRef.current = now;
 
-      setGameState(prevState => {
+      setGameState((prevState) => {
         if (!prevState.timer) return prevState;
 
         const newTimer = { ...prevState.timer };
         const currentPlayerTime = newTimer[prevState.currentPlayer];
-        
+
         if (currentPlayerTime <= 0) {
           // Hết thời gian
           return {
@@ -98,11 +103,14 @@ export function useChessGame() {
             timer: {
               ...newTimer,
               isActive: false,
-            }
+            },
           };
         }
 
-        newTimer[prevState.currentPlayer] = Math.max(0, currentPlayerTime - elapsed);
+        newTimer[prevState.currentPlayer] = Math.max(
+          0,
+          currentPlayerTime - elapsed
+        );
 
         return {
           ...prevState,
@@ -124,14 +132,14 @@ export function useChessGame() {
     if (timeControl.initialTime === 0) {
       // Unlimited time
       setIsTimerEnabled(false);
-      setGameState(prevState => ({
+      setGameState((prevState) => ({
         ...prevState,
         timer: undefined,
       }));
     } else {
       const initialTimeMs = timeControl.initialTime * 60 * 1000;
       setIsTimerEnabled(true);
-      setGameState(prevState => ({
+      setGameState((prevState) => ({
         ...prevState,
         timer: {
           white: initialTimeMs,
@@ -147,12 +155,14 @@ export function useChessGame() {
   // Bắt đầu timer
   const startTimer = useCallback(() => {
     if (gameState.timer) {
-      setGameState(prevState => ({
+      setGameState((prevState) => ({
         ...prevState,
-        timer: prevState.timer ? {
-          ...prevState.timer,
-          isActive: true,
-        } : undefined,
+        timer: prevState.timer
+          ? {
+              ...prevState.timer,
+              isActive: true,
+            }
+          : undefined,
       }));
       lastUpdateRef.current = Date.now();
     }
@@ -161,12 +171,14 @@ export function useChessGame() {
   // Tạm dừng timer
   const pauseTimer = useCallback(() => {
     if (gameState.timer) {
-      setGameState(prevState => ({
+      setGameState((prevState) => ({
         ...prevState,
-        timer: prevState.timer ? {
-          ...prevState.timer,
-          isActive: false,
-        } : undefined,
+        timer: prevState.timer
+          ? {
+              ...prevState.timer,
+              isActive: false,
+            }
+          : undefined,
       }));
     }
   }, [gameState.timer]);
@@ -224,7 +236,8 @@ export function useChessGame() {
       if (newTimer && newTimer.isActive) {
         newTimer = {
           ...newTimer,
-          [gameState.currentPlayer]: newTimer[gameState.currentPlayer] + newTimer.increment,
+          [gameState.currentPlayer]:
+            newTimer[gameState.currentPlayer] + newTimer.increment,
         };
       }
 
@@ -372,17 +385,19 @@ export function useChessGame() {
         // Check game status
         const nextPlayer: Player =
           gameState.currentPlayer === "white" ? "black" : "white";
-        const newGameStatus = chessEngine.getGameStatus(
-          newBoard,
+
         // Cập nhật timer nếu có
         let newTimer = gameState.timer;
         if (newTimer && newTimer.isActive) {
           newTimer = {
             ...newTimer,
-            [gameState.currentPlayer]: newTimer[gameState.currentPlayer] + newTimer.increment,
+            [gameState.currentPlayer]:
+              newTimer[gameState.currentPlayer] + newTimer.increment,
           };
         }
 
+        const newGameStatus = chessEngine.getGameStatus(
+          newBoard,
           nextPlayer,
           move
         );
@@ -426,12 +441,15 @@ export function useChessGame() {
       gameStatus: "playing",
       moveHistory: [],
       capturedPieces: { white: [], black: [] },
-      timer: selectedTimeControl && selectedTimeControl.initialTime > 0 ? {
-        white: selectedTimeControl.initialTime * 60 * 1000,
-        black: selectedTimeControl.initialTime * 60 * 1000,
-        increment: selectedTimeControl.increment * 1000,
-        isActive: false,
-      } : undefined,
+      timer:
+        selectedTimeControl && selectedTimeControl.initialTime > 0
+          ? {
+              white: selectedTimeControl.initialTime * 60 * 1000,
+              black: selectedTimeControl.initialTime * 60 * 1000,
+              increment: selectedTimeControl.increment * 1000,
+              isActive: false,
+            }
+          : undefined,
     });
     setSelectedSquare(null);
     setValidMoves([]);
@@ -536,15 +554,15 @@ export function useChessGame() {
   // Format thời gian hiển thị
   const formatTime = useCallback((timeMs: number): string => {
     if (timeMs <= 0) return "0:00";
-    
+
     const totalSeconds = Math.ceil(timeMs / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
-    
+
     if (minutes > 0) {
-      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      return `${minutes}:${seconds.toString().padStart(2, "0")}`;
     } else {
-      return `0:${seconds.toString().padStart(2, '0')}`;
+      return `0:${seconds.toString().padStart(2, "0")}`;
     }
   }, []);
 
