@@ -44,8 +44,14 @@ export function ChessPieceComponent({
     if (pieceRef.current) {
       gsap.fromTo(
         pieceRef.current,
-        { scale: 0.5, opacity: 0, rotateY: 180 },
-        { scale: 1, opacity: 1, rotateY: 0, duration: 0.4, ease: "back.out(1.7)" }
+        { scale: 0.5, opacity: 1, rotateY: 0 },
+        {
+          scale: 1,
+          opacity: 1,
+          rotateY: 0,
+          duration: 0.4,
+          ease: "back.out(1.7)",
+        }
       );
     }
   }, [piece]);
@@ -82,7 +88,7 @@ export function ChessPieceComponent({
       gsap.killTweensOf(pieceRef.current);
       gsap.set(pieceRef.current, { scale: isSelected ? 1.1 : 1 });
     }
-  }, [isInCheck, piece.type]);
+  }, [isInCheck, piece.type, isSelected]);
 
   return (
     <motion.div

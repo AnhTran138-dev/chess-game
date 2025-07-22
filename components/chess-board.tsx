@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { motion } from "framer-motion"
-import { gsap } from "gsap"
-import { ChessSquare } from "@/components/chess-square"
-import type { ChessPiece, Position, Player, GameStatus } from "@/types/chess"
+import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import { gsap } from "gsap";
+import { ChessSquare } from "@/components/chess-square";
+import type { ChessPiece, Position, Player, GameStatus } from "@/types/chess";
 
 interface ChessBoardProps {
-  board: (ChessPiece | null)[][]
-  selectedSquare: Position | null
-  validMoves: Position[]
-  onSquareClick: (position: Position) => void
-  currentPlayer: Player
-  gameStatus: GameStatus
+  board: (ChessPiece | null)[][];
+  selectedSquare: Position | null;
+  validMoves: Position[];
+  onSquareClick: (position: Position) => void;
+  currentPlayer: Player;
+  gameStatus: GameStatus;
 }
 
 export function ChessBoard({
@@ -23,43 +23,51 @@ export function ChessBoard({
   currentPlayer,
   gameStatus,
 }: ChessBoardProps) {
-  const boardRef = useRef<HTMLDivElement>(null)
-  const overlayRef = useRef<HTMLDivElement>(null)
+  const boardRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (boardRef.current) {
       gsap.fromTo(
         boardRef.current,
         { scale: 0.9, opacity: 0, rotateY: 10 },
-        { scale: 1, opacity: 1, rotateY: 0, duration: 0.8, ease: "power3.out" },
-      )
+        { scale: 1, opacity: 1, rotateY: 0, duration: 0.8, ease: "power3.out" }
+      );
     }
-  }, [])
+  }, []);
 
   // Hiệu ứng khi chiếu bí
   useEffect(() => {
     if (gameStatus === "checkmate" && overlayRef.current) {
-      gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power2.inOut" })
+      gsap.fromTo(
+        overlayRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.5, ease: "power2.inOut" }
+      );
     }
-  }, [gameStatus])
+  }, [gameStatus]);
 
   const isSquareSelected = (row: number, col: number) => {
-    return selectedSquare?.row === row && selectedSquare?.col === col
-  }
+    return selectedSquare?.row === row && selectedSquare?.col === col;
+  };
 
   const isValidMove = (row: number, col: number) => {
-    return validMoves.some((move) => move.row === row && move.col === col)
-  }
+    return validMoves.some((move) => move.row === row && move.col === col);
+  };
 
   const isSquareLight = (row: number, col: number) => {
-    return (row + col) % 2 === 0
-  }
+    return (row + col) % 2 === 0;
+  };
 
   // Check if the king at this position is in check
   const isKingInCheck = (row: number, col: number) => {
-    const piece = board[row][col]
-    return piece?.type === "king" && piece.color === currentPlayer && gameStatus === "check"
-  }
+    const piece = board[row][col];
+    return (
+      piece?.type === "king" &&
+      piece.color === currentPlayer &&
+      gameStatus === "check"
+    );
+  };
 
   return (
     <motion.div
@@ -80,7 +88,7 @@ export function ChessBoard({
           ref={overlayRef}
           className="absolute inset-0 bg-gradient-to-r from-red-900/60 to-purple-900/60 backdrop-blur-md rounded-2xl z-10 flex items-center justify-center"
         >
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="bg-black/80 p-8 rounded-xl text-center backdrop-blur-sm border border-red-500/50 shadow-2xl"
@@ -91,7 +99,7 @@ export function ChessBoard({
             <p className="text-xl text-red-300 font-medium">
               {currentPlayer === "white" ? "Đen" : "Trắng"} đã chiến thắng
             </p>
-          </div>
+          </motion.div>
         </div>
       )}
 
@@ -99,7 +107,10 @@ export function ChessBoard({
       <div className="flex">
         <div className="flex flex-col justify-around mr-3 h-[512px]">
           {[8, 7, 6, 5, 4, 3, 2, 1].map((number) => (
-            <span key={number} className="text-sm font-bold text-slate-300 bg-slate-800/50 rounded px-2 py-1">
+            <span
+              key={number}
+              className="text-sm font-bold text-slate-300 bg-slate-800/50 rounded px-2 py-1"
+            >
               {number}
             </span>
           ))}
@@ -116,18 +127,23 @@ export function ChessBoard({
                   isLight={isSquareLight(rowIndex, colIndex)}
                   isSelected={isSquareSelected(rowIndex, colIndex)}
                   isValidMove={isValidMove(rowIndex, colIndex)}
-                  onClick={() => onSquareClick({ row: rowIndex, col: colIndex })}
+                  onClick={() =>
+                    onSquareClick({ row: rowIndex, col: colIndex })
+                  }
                   currentPlayer={currentPlayer}
                   isKingInCheck={isKingInCheck(rowIndex, colIndex)}
                 />
-              )),
+              ))
             )}
           </div>
 
           {/* Board coordinates */}
           <div className="flex justify-between mt-3 px-2">
             {["a", "b", "c", "d", "e", "f", "g", "h"].map((letter) => (
-              <span key={letter} className="text-sm font-bold text-slate-300 bg-slate-800/50 rounded px-2 py-1">
+              <span
+                key={letter}
+                className="text-sm font-bold text-slate-300 bg-slate-800/50 rounded px-2 py-1"
+              >
                 {letter}
               </span>
             ))}
@@ -135,5 +151,5 @@ export function ChessBoard({
         </div>
       </div>
     </motion.div>
-  )
+  );
 }

@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { motion } from "framer-motion"
-import { gsap } from "gsap"
-import type { Position, Player, PieceType } from "@/types/chess"
+import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import { gsap } from "gsap";
+import type { Position, Player, PieceType } from "@/types/chess";
 
 interface PawnPromotionModalProps {
-  position: Position
-  color: Player
-  onSelect: (pieceType: PieceType) => void
+  position: Position;
+  color: Player;
+  onSelect: (pieceType: PieceType) => void;
 }
 
 const pieceSymbols: Record<string, Record<string, string>> = {
@@ -24,25 +24,35 @@ const pieceSymbols: Record<string, Record<string, string>> = {
     bishop: "♝",
     knight: "♞",
   },
-}
+};
 
-export function PawnPromotionModal({ position, color, onSelect }: PawnPromotionModalProps) {
-  const modalRef = useRef<HTMLDivElement>(null)
+export function PawnPromotionModal({
+  position,
+  color,
+  onSelect,
+}: PawnPromotionModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (modalRef.current) {
       gsap.fromTo(
         modalRef.current,
         { scale: 0.5, opacity: 0, rotateY: 90 },
-        { scale: 1, opacity: 1, rotateY: 0, duration: 0.5, ease: "back.out(1.7)" },
-      )
+        {
+          scale: 1,
+          opacity: 1,
+          rotateY: 0,
+          duration: 0.5,
+          ease: "back.out(1.7)",
+        }
+      );
     }
-  }, [])
+  }, []);
 
-  const pieces: PieceType[] = ["queen", "rook", "bishop", "knight"]
+  const pieces: PieceType[] = ["queen", "rook", "bishop", "knight"];
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50"
@@ -58,7 +68,9 @@ export function PawnPromotionModal({ position, color, onSelect }: PawnPromotionM
           <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">
             Phong cấp tốt
           </h3>
-          <p className="text-slate-300">Chọn quân cờ để phong cấp tốt của bạn</p>
+          <p className="text-slate-300">
+            Chọn quân cờ để phong cấp tốt của bạn
+          </p>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -73,12 +85,16 @@ export function PawnPromotionModal({ position, color, onSelect }: PawnPromotionM
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: pieces.indexOf(piece) * 0.1 }}
             >
-              <span className="text-5xl mb-2 drop-shadow-lg">{pieceSymbols[color][piece]}</span>
-              <span className="text-xs text-slate-300 font-medium capitalize">{piece}</span>
+              <span className="text-5xl mb-2 drop-shadow-lg">
+                {pieceSymbols[color][piece]}
+              </span>
+              <span className="text-xs text-slate-300 font-medium capitalize">
+                {piece}
+              </span>
             </motion.button>
           ))}
         </div>
       </motion.div>
     </motion.div>
-  )
+  );
 }

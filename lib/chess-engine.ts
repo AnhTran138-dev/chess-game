@@ -288,7 +288,12 @@ export class ChessEngine {
       }
     }
 
-    // En passant capture
+    // En passant capture - BẮT TỐT QUA ĐƯỜNG
+    // ĐÂY KHÔNG PHẢI LÀ "ĂN NGANG"! Đây là nước bắt CHÉO đặc biệt:
+    // - Quân tốt đối phương vừa di chuyển 2 ô từ vị trí ban đầu
+    // - Quân tốt của ta đứng cạnh quân tốt đối phương (cùng hàng ngang)
+    // - Ta di chuyển CHÉO đến ô trống phía sau quân tốt đối phương
+    // - Quân tốt đối phương bị loại bỏ khỏi bàn cờ
     if (
       lastMove &&
       this.canCaptureEnPassant(board, position, color, lastMove)
@@ -465,18 +470,23 @@ export class ChessEngine {
     const piece = board[position.row][position.col];
     if (!piece || piece.type !== "pawn") return false;
 
-    // Tốt phải ở hàng thứ 5 (đối với trắng) hoặc hàng thứ 4 (đối với đen)
+    // Tốt phải ở hàng thứ 5 (đối với trắng - index 3) hoặc hàng thứ 4 (đối với đen - index 4)
     const expectedRow = color === "white" ? 3 : 4;
     if (position.row !== expectedRow) return false;
 
-    // Nước đi cuối cùng phải là tốt đối phương di chuyển 2 ô
+    // Nước đi cuối cùng phải là tốt đối phương di chuyển 2 ô từ vị trí ban đầu
     if (lastMove.piece.type !== "pawn" || lastMove.piece.color === color)
       return false;
 
+    // Kiểm tra nước đi có phải là di chuyển 2 ô không
     const moveDistance = Math.abs(lastMove.to.row - lastMove.from.row);
     if (moveDistance !== 2) return false;
 
-    // Tốt đối phương phải ở cạnh tốt hiện tại
+    // Kiểm tra tốt đối phương có di chuyển từ vị trí ban đầu không
+    const opponentStartRow = lastMove.piece.color === "white" ? 6 : 1;
+    if (lastMove.from.row !== opponentStartRow) return false;
+
+    // Tốt đối phương phải ở cạnh tốt hiện tại (cùng hàng ngang)
     if (lastMove.to.row !== position.row) return false;
     const colDistance = Math.abs(lastMove.to.col - position.col);
     if (colDistance !== 1) return false;
@@ -485,6 +495,8 @@ export class ChessEngine {
   }
 
   // Lấy các nước đi bắt tốt qua đường
+  // LƯU Ý: En passant KHÔNG phải là "ăn ngang" - đây là nước bắt CHÉO đặc biệt
+  // Quân tốt di chuyển chéo để bắt quân tốt đối phương đã di chuyển 2 ô
   private getEnPassantMoves(
     board: (ChessPiece | null)[][],
     position: Position,
@@ -494,11 +506,15 @@ export class ChessEngine {
     const moves: Position[] = [];
     const direction = color === "white" ? -1 : 1;
 
-    // Vị trí bắt tốt qua đường
-    const enPassantRow = position.row + direction;
-    const enPassantCol = lastMove.to.col;
+    // Vị trí đích của nước bắt tốt qua đường (di chuyển CHÉO)
+    const enPassantRow = position.row + direction; // Di chuyển về phía trước
+    const enPassantCol = lastMove.to.col; // Cột của quân tốt đối phương
 
-    if (this.isValidPosition(enPassantRow, enPassantCol)) {
+    // Đảm bảo vị trí đích hợp lệ và là ô trống
+    if (
+      this.isValidPosition(enPassantRow, enPassantCol) &&
+      board[enPassantRow][enPassantCol] === null
+    ) {
       moves.push({ row: enPassantRow, col: enPassantCol });
     }
 
