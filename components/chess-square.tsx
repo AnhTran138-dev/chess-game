@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { motion } from "framer-motion"
 import { gsap } from "gsap"
 import { ChessPieceComponent } from "@/components/chess-piece"
 import type { ChessPiece, Position, Player } from "@/types/chess"
@@ -32,9 +33,9 @@ export function ChessSquare({
   useEffect(() => {
     if (isSelected && squareRef.current) {
       gsap.to(squareRef.current, {
-        scale: 1.05,
+        scale: 1.08,
         duration: 0.2,
-        ease: "power2.out",
+        ease: "back.out(1.7)",
       })
     } else if (squareRef.current) {
       gsap.to(squareRef.current, {
@@ -65,18 +66,23 @@ export function ChessSquare({
     isValidMove && !piece && (position.col === 2 || position.col === 6) && (position.row === 0 || position.row === 7)
 
   return (
-    <div
+    <motion.div
       ref={squareRef}
       className={cn(
-        "w-16 h-16 flex items-center justify-center cursor-pointer relative transition-all duration-200",
-        isLight ? "bg-slate-600 dark:bg-slate-700" : "bg-slate-800 dark:bg-slate-900",
-        isSelected && "ring-4 ring-indigo-500 ring-opacity-70",
-        isValidMove && "ring-2 ring-green-500 ring-opacity-50",
-        isKingInCheckOnThisSquare && "ring-4 ring-red-500 ring-opacity-80 bg-red-900/30",
-        isCastlingMove && "ring-2 ring-purple-500 ring-opacity-60",
-        "hover:brightness-110",
+        "w-16 h-16 flex items-center justify-center cursor-pointer relative transition-all duration-300",
+        isLight 
+          ? "bg-gradient-to-br from-amber-100 to-amber-200 dark:from-slate-300 dark:to-slate-400" 
+          : "bg-gradient-to-br from-amber-800 to-amber-900 dark:from-slate-700 dark:to-slate-800",
+        isSelected && "ring-4 ring-blue-400 ring-opacity-80 shadow-lg shadow-blue-400/25",
+        isValidMove && "ring-2 ring-emerald-400 ring-opacity-70 shadow-md shadow-emerald-400/20",
+        isKingInCheckOnThisSquare && "ring-4 ring-red-400 ring-opacity-90 bg-red-900/40 shadow-lg shadow-red-400/30",
+        isCastlingMove && "ring-2 ring-purple-400 ring-opacity-70 shadow-md shadow-purple-400/20",
+        "hover:brightness-110 hover:shadow-lg",
       )}
       onClick={handleClick}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
     >
       {piece && (
         <ChessPieceComponent
@@ -87,17 +93,34 @@ export function ChessSquare({
         />
       )}
 
-      {isValidMove && !piece && !isCastlingMove && <div className="w-4 h-4 bg-green-500 rounded-full opacity-60" />}
+      {isValidMove && !piece && !isCastlingMove && (
+        <motion.div 
+          className="w-4 h-4 bg-emerald-400 rounded-full shadow-lg"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 500, damping: 25 }}
+        />
+      )}
 
       {isCastlingMove && (
-        <div className="w-6 h-6 border-2 border-purple-500 rounded-full opacity-70 flex items-center justify-center">
-          <div className="w-2 h-2 bg-purple-500 rounded-full" />
-        </div>
+        <motion.div 
+          className="w-6 h-6 border-2 border-purple-400 rounded-full flex items-center justify-center shadow-lg"
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 500, damping: 25 }}
+        >
+          <div className="w-2 h-2 bg-purple-400 rounded-full" />
+        </motion.div>
       )}
 
       {isValidMove && piece && (
-        <div className="absolute inset-0 border-4 border-red-500 border-opacity-60 rounded-sm" />
+        <motion.div 
+          className="absolute inset-0 border-4 border-red-400 border-opacity-80 rounded-sm shadow-lg shadow-red-400/30"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        />
       )}
-    </div>
+    </motion.div>
   )
 }

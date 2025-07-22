@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { gsap } from "gsap";
 import type { ChessPiece } from "@/types/chess";
 
@@ -42,8 +43,8 @@ export function ChessPieceComponent({
     if (pieceRef.current) {
       gsap.fromTo(
         pieceRef.current,
-        { scale: 0.8 },
-        { scale: 1, duration: 0.2, ease: "back.out(1.2)" }
+        { scale: 0.5, opacity: 0, rotateY: 180 },
+        { scale: 1, opacity: 1, rotateY: 0, duration: 0.4, ease: "back.out(1.7)" }
       );
     }
   }, [piece]);
@@ -51,13 +52,15 @@ export function ChessPieceComponent({
   useEffect(() => {
     if (isSelected && pieceRef.current) {
       gsap.to(pieceRef.current, {
-        y: -4,
+        y: -6,
+        scale: 1.1,
         duration: 0.2,
-        ease: "power2.out",
+        ease: "back.out(1.7)",
       });
     } else if (pieceRef.current) {
       gsap.to(pieceRef.current, {
         y: 0,
+        scale: 1,
         duration: 0.2,
         ease: "power2.out",
       });
@@ -68,7 +71,7 @@ export function ChessPieceComponent({
   useEffect(() => {
     if (isInCheck && piece.type === "king" && pieceRef.current) {
       gsap.to(pieceRef.current, {
-        scale: 1.1,
+        scale: 1.2,
         duration: 0.5,
         yoyo: true,
         repeat: -1,
@@ -76,37 +79,39 @@ export function ChessPieceComponent({
       });
     } else if (pieceRef.current) {
       gsap.killTweensOf(pieceRef.current);
-      gsap.set(pieceRef.current, { scale: 1 });
+      gsap.set(pieceRef.current, { scale: isSelected ? 1.1 : 1 });
     }
   }, [isInCheck, piece.type]);
 
   return (
-    <div
+    <motion.div
       ref={pieceRef}
       className={`text-4xl select-none transition-all duration-200 ${
-        canMove ? "cursor-pointer hover:scale-110" : "cursor-default"
-      } ${isSelected ? "drop-shadow-lg" : ""} ${
-        isInCheck && piece.type === "king"
-          ? "text-red-400"
+        "text-5xl select-none transition-all duration-300 font-bold",
+        canMove ? "cursor-pointer" : "cursor-default",
+        isSelected ? "drop-shadow-2xl" : "drop-shadow-lg",
+          ? "text-red-300"
           : piece.color === "white"
-          ? "text-slate-100"
-          : "text-slate-950"
+          ? "text-white"
+          : "text-slate-900"
       }`}
+      whileHover={canMove ? { scale: 1.1, y: -2 } : {}}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
       style={{
         filter: isSelected
-          ? "brightness(1.2)"
+          ? "brightness(1.3) drop-shadow(0 0 15px rgba(59, 130, 246, 0.8))"
           : isInCheck && piece.type === "king"
-          ? "brightness(1.3)"
-          : "none",
+          ? "brightness(1.4) drop-shadow(0 0 20px rgba(239, 68, 68, 0.9))"
+          : "drop-shadow(0 2px 8px rgba(0,0,0,0.5))",
         textShadow:
           isInCheck && piece.type === "king"
-            ? "0 0 10px rgba(239, 68, 68, 0.8), 2px 2px 4px rgba(0,0,0,0.3)"
-            : "2px 2px 4px rgba(0,0,0,0.3)",
-        transform: "rotate(0deg)",
-        opacity: 1, // Đảm bảo quân cờ luôn hiển thị
+            ? "0 0 20px rgba(239, 68, 68, 1), 0 0 40px rgba(239, 68, 68, 0.5)"
+            : isSelected
+            ? "0 0 15px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.4)"
+            : "0 4px 8px rgba(0,0,0,0.6), 0 2px 4px rgba(0,0,0,0.3)",
       }}
     >
       {pieceSymbols[piece.color][piece.type]}
-    </div>
+    </motion.div>
   );
 }

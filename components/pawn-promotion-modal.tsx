@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { motion } from "framer-motion"
 import { gsap } from "gsap"
 import type { Position, Player, PieceType } from "@/types/chess"
 
@@ -32,8 +33,8 @@ export function PawnPromotionModal({ position, color, onSelect }: PawnPromotionM
     if (modalRef.current) {
       gsap.fromTo(
         modalRef.current,
-        { scale: 0.8, opacity: 0 },
-        { scale: 1, opacity: 1, duration: 0.3, ease: "back.out(1.7)" },
+        { scale: 0.5, opacity: 0, rotateY: 90 },
+        { scale: 1, opacity: 1, rotateY: 0, duration: 0.5, ease: "back.out(1.7)" },
       )
     }
   }, [])
@@ -41,26 +42,43 @@ export function PawnPromotionModal({ position, color, onSelect }: PawnPromotionM
   const pieces: PieceType[] = ["queen", "rook", "bishop", "knight"]
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-      <div
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50"
+    >
+      <motion.div
         ref={modalRef}
-        className="bg-slate-800 p-6 rounded-lg shadow-2xl border border-indigo-500/30 max-w-xs w-full"
+        className="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-2xl shadow-2xl border border-blue-500/30 max-w-sm w-full mx-4 ring-1 ring-white/10"
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
       >
-        <h3 className="text-xl font-bold text-center mb-4 text-slate-100">Phong cấp tốt</h3>
-        <p className="text-slate-300 text-center mb-6">Chọn quân cờ để phong cấp tốt của bạn</p>
+        <div className="text-center mb-6">
+          <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">
+            Phong cấp tốt
+          </h3>
+          <p className="text-slate-300">Chọn quân cờ để phong cấp tốt của bạn</p>
+        </div>
 
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {pieces.map((piece) => (
-            <button
+            <motion.button
               key={piece}
               onClick={() => onSelect(piece)}
-              className="flex items-center justify-center p-4 bg-slate-700 hover:bg-indigo-600 rounded-lg transition-colors"
+              className="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-700 to-slate-800 hover:from-blue-600 hover:to-purple-600 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-blue-500/25 border border-slate-600/50 hover:border-blue-500/50"
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: pieces.indexOf(piece) * 0.1 }}
             >
-              <span className="text-4xl">{pieceSymbols[color][piece]}</span>
-            </button>
+              <span className="text-5xl mb-2 drop-shadow-lg">{pieceSymbols[color][piece]}</span>
+              <span className="text-xs text-slate-300 font-medium capitalize">{piece}</span>
+            </motion.button>
           ))}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

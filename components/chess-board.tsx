@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { motion } from "framer-motion"
 import { gsap } from "gsap"
 import { ChessSquare } from "@/components/chess-square"
 import type { ChessPiece, Position, Player, GameStatus } from "@/types/chess"
@@ -29,8 +30,8 @@ export function ChessBoard({
     if (boardRef.current) {
       gsap.fromTo(
         boardRef.current,
-        { scale: 0.95, opacity: 0.8 },
-        { scale: 1, opacity: 1, duration: 0.4, ease: "power2.out" },
+        { scale: 0.9, opacity: 0, rotateY: 10 },
+        { scale: 1, opacity: 1, rotateY: 0, duration: 0.8, ease: "power3.out" },
       )
     }
   }, [])
@@ -77,35 +78,51 @@ export function ChessBoard({
   }
 
   return (
-    <div
+    <motion.div
       ref={boardRef}
-      className="inline-block p-4 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900 rounded-xl shadow-2xl relative"
+      className="inline-block p-6 bg-gradient-to-br from-slate-800/50 via-slate-900/50 to-slate-950/50 backdrop-blur-xl rounded-2xl shadow-2xl relative border border-slate-700/30 ring-1 ring-white/5"
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
+      {/* Decorative corners */}
+      <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-blue-400/50 rounded-tl-lg" />
+      <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-blue-400/50 rounded-tr-lg" />
+      <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-blue-400/50 rounded-bl-lg" />
+      <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-blue-400/50 rounded-br-lg" />
+
       {/* Overlay khi chiếu bí */}
       {gameStatus === "checkmate" && (
         <div
           ref={overlayRef}
-          className="absolute inset-0 bg-gradient-to-r from-red-900/40 to-purple-900/40 backdrop-blur-sm rounded-xl z-10 flex items-center justify-center"
+          className="absolute inset-0 bg-gradient-to-r from-red-900/60 to-purple-900/60 backdrop-blur-md rounded-2xl z-10 flex items-center justify-center"
         >
-          <div className="bg-black/70 p-6 rounded-lg text-center backdrop-blur-sm border border-red-500/30">
-            <h2 className="text-3xl font-bold text-white mb-2">Chiếu Bí!</h2>
-            <p className="text-xl text-red-300">{currentPlayer === "white" ? "Đen" : "Trắng"} đã chiến thắng</p>
+          <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-black/80 p-8 rounded-xl text-center backdrop-blur-sm border border-red-500/50 shadow-2xl"
+          >
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent mb-3">
+              Chiếu Bí!
+            </h2>
+            <p className="text-xl text-red-300 font-medium">
+              {currentPlayer === "white" ? "Đen" : "Trắng"} đã chiến thắng
+            </p>
           </div>
         </div>
       )}
 
       {/* Row numbers on the left */}
       <div className="flex">
-        <div className="flex flex-col justify-around mr-2 h-[512px]">
+        <div className="flex flex-col justify-around mr-3 h-[512px]">
           {[8, 7, 6, 5, 4, 3, 2, 1].map((number) => (
-            <span key={number} className="text-sm font-medium text-slate-400">
+            <span key={number} className="text-sm font-bold text-slate-300 bg-slate-800/50 rounded px-2 py-1">
               {number}
             </span>
           ))}
         </div>
 
         <div>
-          <div className="grid grid-cols-8 gap-0 border-4 border-slate-700 dark:border-slate-600 rounded-lg overflow-hidden">
+          <div className="grid grid-cols-8 gap-0 border-4 border-slate-600/50 rounded-xl overflow-hidden shadow-inner bg-gradient-to-br from-slate-700/20 to-slate-800/20">
             {board.map((row, rowIndex) =>
               row.map((piece, colIndex) => (
                 <ChessSquare
@@ -124,16 +141,16 @@ export function ChessBoard({
           </div>
 
           {/* Board coordinates */}
-          <div className="flex justify-between mt-2 px-2">
+          <div className="flex justify-between mt-3 px-2">
             {["a", "b", "c", "d", "e", "f", "g", "h"].map((letter) => (
-              <span key={letter} className="text-sm font-medium text-slate-400">
+              <span key={letter} className="text-sm font-bold text-slate-300 bg-slate-800/50 rounded px-2 py-1">
                 {letter}
               </span>
             ))}
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 

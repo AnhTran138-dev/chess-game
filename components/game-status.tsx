@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import type { Player, GameStatus as GameStatusType, ChessPiece } from "@/types/chess"
@@ -47,90 +48,143 @@ export function GameStatus({ currentPlayer, gameStatus, capturedPieces }: GameSt
   const getStatusColor = () => {
     switch (gameStatus) {
       case "checkmate":
-        return "bg-green-500 text-white"
+        return "bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-500/25"
       case "check":
-        return "bg-red-500 text-white"
+        return "bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/25"
       case "stalemate":
-        return "bg-yellow-500 text-black"
+        return "bg-gradient-to-r from-yellow-500 to-amber-500 text-black shadow-lg shadow-yellow-500/25"
       default:
-        return currentPlayer === "white" ? "bg-slate-100 text-slate-900" : "bg-slate-800 text-white"
+        return currentPlayer === "white" 
+          ? "bg-gradient-to-r from-slate-100 to-slate-200 text-slate-900 shadow-lg" 
+          : "bg-gradient-to-r from-slate-800 to-slate-900 text-white shadow-lg"
     }
   }
 
   return (
-    <Card className="bg-slate-800/80 dark:bg-slate-900/80 backdrop-blur-sm border-slate-700">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg text-slate-100">
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className="bg-slate-900/90 backdrop-blur-xl border-slate-700/50 shadow-2xl ring-1 ring-white/10">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3 text-xl text-slate-100 font-bold">
           {getStatusIcon()}
           Trạng thái trò chơi
         </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Badge className={`${getStatusColor()} text-sm px-3 py-1`} variant="secondary">
-          {getStatusText()}
-        </Badge>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <motion.div
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          >
+            <Badge className={`${getStatusColor()} text-base px-4 py-2 font-semibold`} variant="secondary">
+              {getStatusText()}
+            </Badge>
+          </motion.div>
 
-        {gameStatus === "check" && (
-          <div className="p-3 bg-red-900/20 rounded-lg border border-red-800">
-            <p className="text-sm text-red-300 font-medium">
-              ⚠️ Vua đang bị tấn công! Phải di chuyển vua hoặc chặn cuộc tấn công.
-            </p>
-          </div>
-        )}
+          {gameStatus === "check" && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-4 bg-gradient-to-r from-red-900/30 to-red-800/30 rounded-xl border border-red-700/50 backdrop-blur-sm"
+            >
+              <p className="text-sm text-red-200 font-medium flex items-center gap-2">
+                <Swords className="w-4 h-4" />
+                Vua đang bị tấn công! Phải di chuyển vua hoặc chặn cuộc tấn công.
+              </p>
+            </motion.div>
+          )}
 
-        {gameStatus === "stalemate" && (
-          <div className="p-3 bg-yellow-900/20 rounded-lg border border-yellow-800">
-            <p className="text-sm text-yellow-300 font-medium">
-              🤝 Hòa cờ! Không còn nước đi hợp lệ nhưng vua không bị chiếu.
-            </p>
-          </div>
-        )}
+          {gameStatus === "stalemate" && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-4 bg-gradient-to-r from-yellow-900/30 to-amber-800/30 rounded-xl border border-yellow-700/50 backdrop-blur-sm"
+            >
+              <p className="text-sm text-yellow-200 font-medium flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4" />
+                Hòa cờ! Không còn nước đi hợp lệ nhưng vua không bị chiếu.
+              </p>
+            </motion.div>
+          )}
 
-        {/* Captured Pieces */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <h4 className="text-sm font-medium mb-2 text-slate-300">Quân trắng bị bắt</h4>
-            <div className="flex flex-wrap gap-1">
-              {capturedPieces.white.map((piece, index) => (
-                <span key={index} className="text-lg text-slate-100">
-                  {piece.type === "king"
-                    ? "♚"
-                    : piece.type === "queen"
-                      ? "♛"
-                      : piece.type === "rook"
-                        ? "♜"
-                        : piece.type === "bishop"
-                          ? "♝"
-                          : piece.type === "knight"
-                            ? "♞"
-                            : "♟"}
-                </span>
-              ))}
+          {/* Captured Pieces */}
+          <div className="grid grid-cols-2 gap-6">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-slate-800/50 rounded-xl p-4 backdrop-blur-sm border border-slate-700/30"
+            >
+              <h4 className="text-sm font-bold mb-3 text-slate-200 flex items-center gap-2">
+                <div className="w-3 h-3 bg-slate-100 rounded-full"></div>
+                Quân trắng bị bắt
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {capturedPieces.white.map((piece, index) => (
+                  <motion.span 
+                    key={index} 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="text-xl text-slate-100 bg-slate-700/50 rounded-lg p-1 shadow-sm"
+                  >
+                    {piece.type === "king"
+                      ? "♚"
+                      : piece.type === "queen"
+                        ? "♛"
+                        : piece.type === "rook"
+                          ? "♜"
+                          : piece.type === "bishop"
+                            ? "♝"
+                            : piece.type === "knight"
+                              ? "♞"
+                              : "♟"}
+                  </motion.span>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-slate-800/50 rounded-xl p-4 backdrop-blur-sm border border-slate-700/30"
+            >
+              <h4 className="text-sm font-bold mb-3 text-slate-200 flex items-center gap-2">
+                <div className="w-3 h-3 bg-slate-900 rounded-full border border-slate-600"></div>
+                Quân đen bị bắt
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {capturedPieces.black.map((piece, index) => (
+                  <motion.span 
+                    key={index} 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="text-xl text-slate-900 bg-slate-300/90 rounded-lg p-1 shadow-sm"
+                  >
+                    {piece.type === "king"
+                      ? "♔"
+                      : piece.type === "queen"
+                        ? "♕"
+                        : piece.type === "rook"
+                          ? "♖"
+                          : piece.type === "bishop"
+                            ? "♗"
+                            : piece.type === "knight"
+                              ? "♘"
+                              : "♙"}
+                  </motion.span>
+                ))}
+              </div>
+            </motion.div>
             </div>
           </div>
-
-          <div>
-            <h4 className="text-sm font-medium mb-2 text-slate-300">Quân đen bị bắt</h4>
-            <div className="flex flex-wrap gap-1">
-              {capturedPieces.black.map((piece, index) => (
-                <span key={index} className="text-lg text-slate-900">
-                  {piece.type === "king"
-                    ? "♔"
-                    : piece.type === "queen"
-                      ? "♕"
-                      : piece.type === "rook"
-                        ? "♖"
-                        : piece.type === "bishop"
-                          ? "♗"
-                          : piece.type === "knight"
-                            ? "♘"
-                            : "♙"}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   )
 }
