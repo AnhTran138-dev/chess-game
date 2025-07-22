@@ -94,7 +94,7 @@ export function ChessPieceComponent({
     <motion.div
       ref={pieceRef}
       className={cn(
-        "text-5xl select-none transition-all duration-300 font-bold",
+        "text-2xl sm:text-3xl md:text-4xl lg:text-5xl select-none transition-all duration-300 font-bold",
         canMove ? "cursor-pointer" : "cursor-default",
         isSelected ? "drop-shadow-2xl" : "drop-shadow-lg",
         isInCheck && piece.type === "king"

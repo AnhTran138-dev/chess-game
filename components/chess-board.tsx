@@ -105,11 +105,11 @@ export function ChessBoard({
 
       {/* Row numbers on the left */}
       <div className="flex">
-        <div className="flex flex-col justify-around mr-3 h-[512px]">
+        <div className="flex flex-col justify-around mr-1 sm:mr-2 md:mr-3 h-[320px] sm:h-[384px] md:h-[512px]">
           {[8, 7, 6, 5, 4, 3, 2, 1].map((number) => (
             <span
               key={number}
-              className="text-sm font-bold text-slate-300 bg-slate-800/50 rounded px-2 py-1"
+              className="text-xs sm:text-sm font-bold text-slate-300 bg-slate-800/50 rounded px-1 sm:px-2 py-0.5 sm:py-1"
             >
               {number}
             </span>
@@ -138,11 +138,11 @@ export function ChessBoard({
           </div>
 
           {/* Board coordinates */}
-          <div className="flex justify-between mt-3 px-2">
+          <div className="flex justify-between mt-1 sm:mt-2 md:mt-3 px-1 sm:px-2">
             {["a", "b", "c", "d", "e", "f", "g", "h"].map((letter) => (
               <span
                 key={letter}
-                className="text-sm font-bold text-slate-300 bg-slate-800/50 rounded px-2 py-1"
+                className="text-xs sm:text-sm font-bold text-slate-300 bg-slate-800/50 rounded px-1 sm:px-2 py-0.5 sm:py-1"
               >
                 {letter}
               </span>

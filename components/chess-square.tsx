@@ -69,7 +69,7 @@ export function ChessSquare({
     <motion.div
       ref={squareRef}
       className={cn(
-        "w-16 h-16 flex items-center justify-center cursor-pointer relative transition-all duration-300",
+        "w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 flex items-center justify-center cursor-pointer relative transition-all duration-300",
         isLight 
           ? "bg-gradient-to-br from-amber-100 to-amber-200 dark:from-slate-300 dark:to-slate-400" 
           : "bg-gradient-to-br from-amber-800 to-amber-900 dark:from-slate-700 dark:to-slate-800",
@@ -95,7 +95,7 @@ export function ChessSquare({
 
       {isValidMove && !piece && !isCastlingMove && (
         <motion.div 
-          className="w-4 h-4 bg-emerald-400 rounded-full shadow-lg"
+          className="w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 bg-emerald-400 rounded-full shadow-lg"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 500, damping: 25 }}
@@ -104,12 +104,12 @@ export function ChessSquare({
 
       {isCastlingMove && (
         <motion.div 
-          className="w-6 h-6 border-2 border-purple-400 rounded-full flex items-center justify-center shadow-lg"
+          className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 border-2 border-purple-400 rounded-full flex items-center justify-center shadow-lg"
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: "spring", stiffness: 500, damping: 25 }}
         >
-          <div className="w-2 h-2 bg-purple-400 rounded-full" />
+          <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 bg-purple-400 rounded-full" />
         </motion.div>
       )}
 

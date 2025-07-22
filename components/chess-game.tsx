@@ -57,7 +57,7 @@ export function ChessGame() {
 
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
         {/* Timer & Time Control */}
-        <div className="xl:col-span-1 space-y-6">
+        <div className="xl:col-span-1 space-y-4 xl:space-y-6">
           {!gameStarted && (
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -91,7 +91,7 @@ export function ChessGame() {
         </div>
 
         {/* Main Game Area */}
-        <div className="xl:col-span-3 space-y-6">
+        <div className="xl:col-span-3 space-y-4 xl:space-y-6">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -109,7 +109,7 @@ export function ChessGame() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
-            <Card className="p-6 bg-slate-900/90 backdrop-blur-xl border-slate-700/50 shadow-2xl ring-1 ring-white/10">
+            <Card className="p-2 sm:p-4 md:p-6 bg-slate-900/90 backdrop-blur-xl border-slate-700/50 shadow-2xl ring-1 ring-white/10">
               <div className="flex justify-center">
                 <ChessBoard
                   board={board}
@@ -125,7 +125,7 @@ export function ChessGame() {
         </div>
 
         {/* Side Panel */}
-        <div className="xl:col-span-1 space-y-6">
+        <div className="xl:col-span-1 space-y-4 xl:space-y-6">
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
